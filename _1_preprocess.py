@@ -29,7 +29,7 @@ def preprocess_audio(file_path):
         audio = audio.mean(axis=1)
 
 #   3. Normalize volum to [-1, 1]
-    audio = audio / np.max(np.abs(audio))
+    audio = audio / (np.max(np.abs(audio)) + 1e-8)
 
 #   4. Trim silence
     threshold = 0.02

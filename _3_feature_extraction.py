@@ -1,103 +1,79 @@
 import numpy as np
+import math
 
-# RMS- năn lượng trung bình của tín hiệu âm thanh
+# ==================== CÁC HÀM ĐẶC TRƯNG ====================
 def rms_energy(frame):
-    if len(frame) == 0: return 0.0
+    if len(frame) == 0: 
+        return 0.0
     return np.sqrt(np.mean(frame ** 2))
 
-# Zero Crossing Rate - tốc độ thay đổi dấu của tín hiệu âm thanh
+
 def zero_crossing_rate(frame):
+    if len(frame) < 2:
+        return 0.0
+    count = np.sum(np.diff(np.sign(frame)) != 0)
+    return count / (len(frame) - 1)
 
-    zero_crossing_count = 0
-    for i in range(len(frame) - 1):
-        # Kiểm tra nếu dấu thay đổi (vượt qua 0)
-        if (frame[i] >= 0 and frame[i + 1] < 0) or (frame[i] < 0 and frame[i + 1] >= 0):
-            zero_crossing_count += 1
-    
-    zcr = zero_crossing_count / (len(frame) - 1)
-    return zcr
 
-# extract Pitch contour
 def pitch_contour(magnitude, sample_rate):
-    freqs = np.fft.rfftfreq(len(magnitude) * 2 - 1, d=1/sample_rate)
+    """Sửa lỗi freqs"""
+    N = 2 * (len(magnitude) - 1)                    # Độ dài gốc của frame
+    freqs = np.fft.rfftfreq(N, d=1/sample_rate)
     peak_index = np.argmax(magnitude)
-    pitch_freq = freqs[peak_index]
-    return pitch_freq
+    pitch = freqs[peak_index]
+    return pitch if 60 <= pitch <= 2000 else 0.0
 
-# extract chroma
-def chroma_features(magnitude, sample_rate):
-    """
-    Tính Chroma features - năng lượng ở mỗi pitch class
+
+def chroma_features(magnitude, sample_rate, fft_size=2048):
+    """Chroma 12 chiều"""
+    chroma = np.zeros(12)
+    freqs = np.fft.rfftfreq(fft_size, d=1/sample_rate)[:len(magnitude)]
     
-    Args:
-        magnitude_spectrum: phổ tần số
-        sample_rate: tần số lấy mẫu
-        fft_size: kích thước FFT
-    
-    Returns:
-        list: 12 chroma features (cho 12 semitones)
-    """
-    # Khởi tạo chroma
-    chroma = [0.0] * 12
-    
-    # Ánh xạ mỗi bin FFT đến chroma pitch class
-    for k in range(len(magnitude_spectrum)):
-        freq = k * sample_rate / fft_size
-        
-        if freq < 20:  # Bỏ qua tần số quá thấp
+    for k, mag in enumerate(magnitude):
+        freq = freqs[k]
+        if freq < 20:
             continue
-        
-        # Tính semitone từ một tần số tham chiếu (C0 = 16.35 Hz)
-        C0_Hz = 16.35
-        semitone = 12 * math.log2(freq / C0_Hz)
-        
-        # Chuyển đổi sang pitch class (0-11)
-        pitch_class = int(round(semitone)) % 12
-        
-        # Thêm năng lượng vào pitch class này
-        chroma[pitch_class] += magnitude_spectrum[k]
+        # Tính pitch class
+        pitch_class = int(round(12 * np.log2(freq / 440.0) + 69)) % 12
+        chroma[pitch_class] += mag
     
-    # Chuẩn hóa
-    total_energy = sum(chroma)
-    if total_energy > 0:
-        chroma = [c / total_energy for c in chroma]
-    
+    total = np.sum(chroma)
+    if total > 0:
+        chroma = chroma / total
     return chroma
 
-# Main Feature Extraction Function
-def extract_features( frames, stft_result,sample_rate ):
+
+# ==================== TRÍCH XUẤT TẤT CẢ ====================
+
+def extract_features(frames, stft_result, sample_rate):
     rms_list = []
     zcr_list = []
-    pitch_counter = []
-    chroma = []
+    pitch_list = []
+    chroma_list = []
+    
     for i in range(len(frames)):
         frame = frames[i]
         magnitude = stft_result[i]
-        # RMS
-        rms = rms_energy(frame)
-        rms_list.append(rms)
-      
-        # ZCR
-        zcr = zero_crossing_rate(frame)
-        zcr_list.append(zcr)
-      
-        # Pitch_contour
-        pitch = pitch_contour(magnitude, sample_rate)
-        pitch_counter.append(pitch)
-
-        # Chroma
-        chroma_features = chroma_features(magnitude, sample_rate)
-        chroma.append(chroma_features)
-
-    feature_vector = [
-        np.mean(rms_list),
-        np.std(rms_list),
-        np.mean(zcr_list),
-        np.std(zcr_list),
-        np.mean(pitch_counter),
-        np.std(pitch_counter),
-        np.mean(chroma, axis=0)
-    ]
+        
+        rms_list.append(rms_energy(frame))
+        zcr_list.append(zero_crossing_rate(frame))
+        pitch_list.append(pitch_contour(magnitude, sample_rate))
+        chroma_list.append(chroma_features(magnitude, sample_rate))
     
-
-    return feature_vector
+    # Tạo feature vector
+    chroma_mean = np.mean(chroma_list, axis=0)   # 12 chiều
+    
+    song_features = [
+        np.mean(rms_list), np.std(rms_list),
+        np.mean(zcr_list), np.std(zcr_list),
+        np.mean(pitch_list), np.std(pitch_list),
+    ] + list(chroma_mean)                        # Thêm 12 chroma
+    
+    pitch_contour_array = np.array(pitch_list)
+    chroma_sequence = np.array(chroma_list)   # shape = (n_frames, 12)
+    
+    return {
+        "song_vector": np.array(song_features),      # vector cố định
+        "pitch_contour": pitch_contour_array,        # dùng cho DTW
+        "chroma_sequence": chroma_sequence           # dùng cho DTW chroma
+    }
