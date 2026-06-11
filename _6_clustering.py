@@ -4,7 +4,7 @@ import os
 import json
 
 
-# ==================== K-MEANS CLUSTERING (Thủ công, không dùng sklearn) ====================
+# ==================== K-MEANS CLUSTERING====================
 
 def kmeans_init_centroids(data, k, seed=42):
     """Khởi tạo centroid bằng K-Means++ để có kết quả tốt hơn random"""
