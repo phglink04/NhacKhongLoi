@@ -45,8 +45,19 @@ with open("database/audio_features.csv", "r", encoding="utf-8") as f:
     for row in reader:
         db_features[row[0]] = list(map(float, row[1:]))
 
+# Pre-load toàn bộ sequences vào RAM (tránh đọc file khi query)
+db_sequences = {}
+seq_dir = "database/sequences"
+for fname in db_features.keys():
+    seq_path = os.path.join(seq_dir, fname.replace('.wav', '.npz'))
+    if os.path.exists(seq_path):
+        data = np.load(seq_path)
+        db_sequences[fname] = {"pitch": data['pitch'], "chroma": data['chroma']}
+    else:
+        db_sequences[fname] = None
+
 total_songs = len(db_features)
-print(f"Database loaded: {total_songs} songs, {len(cluster_centroids)} clusters")
+print(f"Database loaded: {total_songs} songs, {len(cluster_centroids)} clusters, {len(db_sequences)} sequences in RAM")
 
 
 # ==================== SEARCH LOGIC ====================
@@ -83,13 +94,7 @@ def do_search(file_path, top_k=10, n_clusters=3):
     for cluster_id, _ in nearest:
         for file_name in cluster_index[cluster_id]:
             db_vector = db_features[file_name]
-            seq_path = f"database/sequences/{file_name.replace('.wav', '.npz')}"
-            
-            if os.path.exists(seq_path):
-                db_seq_data = np.load(seq_path)
-                db_seq = {"pitch": db_seq_data['pitch'], "chroma": db_seq_data['chroma']}
-            else:
-                db_seq = None
+            db_seq = db_sequences.get(file_name)
 
             score, pitch_sim, vec_sim = compute_melody_similarity(
                 query_dict, {"song_vector": db_vector}, query_seq, db_seq
@@ -159,13 +164,77 @@ def search():
 
     try:
         result = do_search(filepath, top_k=top_k, n_clusters=n_clusters)
+        # Thêm thông tin file query vào response để có thể phát
+        result["query_file"] = filename
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    finally:
-        # Xóa file tạm
-        if os.path.exists(filepath):
-            os.remove(filepath)
+
+
+
+
+@app.route("/query-audio/<filename>")
+def serve_query_audio(filename):
+    """Phục vụ file audio đã upload để nghe trực tiếp"""
+    from flask import send_from_directory
+    import mimetypes
+    
+    # Validate filename để tránh path traversal attacks
+    if '..' in filename or '/' in filename or '\\' in filename:
+        return jsonify({"error": "Invalid filename"}), 400
+    
+    upload_dir = os.path.abspath(app.config['UPLOAD_FOLDER'])
+    filepath = os.path.join(upload_dir, filename)
+    
+    # Verify file exists and is within the safe directory
+    if not os.path.exists(filepath) or not os.path.abspath(filepath).startswith(upload_dir):
+        return jsonify({"error": "File not found"}), 404
+    
+    # Determine MIME type
+    mime_type, _ = mimetypes.guess_type(filepath)
+    if not mime_type:
+        mime_type = 'audio/wav'  # Default to WAV
+    
+    try:
+        response = send_from_directory(upload_dir, filename, mimetype=mime_type)
+        # Add CORS headers for audio playback from browser
+        response.headers['Accept-Ranges'] = 'bytes'
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+    except Exception as e:
+        return jsonify({"error": f"Cannot serve file: {str(e)}"}), 500
+
+
+@app.route("/audio/<filename>")
+def serve_audio(filename):
+    """Phục vụ file audio từ thư mục dataset để nghe trực tiếp"""
+    from flask import send_from_directory
+    import mimetypes
+    
+    # Validate filename để tránh path traversal attacks
+    if '..' in filename or '/' in filename or '\\' in filename:
+        return jsonify({"error": "Invalid filename"}), 400
+    
+    audio_dir = os.path.abspath("Dataset_NhacKhongLoi")
+    filepath = os.path.join(audio_dir, filename)
+    
+    # Verify file exists and is within the safe directory
+    if not os.path.exists(filepath) or not os.path.abspath(filepath).startswith(audio_dir):
+        return jsonify({"error": "File not found"}), 404
+    
+    # Determine MIME type
+    mime_type, _ = mimetypes.guess_type(filepath)
+    if not mime_type:
+        mime_type = 'audio/wav'  # Default to WAV
+    
+    try:
+        response = send_from_directory(audio_dir, filename, mimetype=mime_type)
+        # Add CORS headers for audio playback from browser
+        response.headers['Accept-Ranges'] = 'bytes'
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+    except Exception as e:
+        return jsonify({"error": f"Cannot serve file: {str(e)}"}), 500
 
 
 if __name__ == "__main__":

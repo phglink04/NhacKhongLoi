@@ -8,12 +8,16 @@ def cosine_similarity(v1, v2):
     return 1 - cosine(v1, v2)
 
 
-def dtw_distance(x, y, max_len=2000):
-    """Dynamic Time Warping cho Pitch Contour"""
+def dtw_distance(x, y, max_len=500, window=50):
+    """
+    Dynamic Time Warping với Sakoe-Chiba Band
+    - max_len: giới hạn độ dài chuỗi (downsample nếu vượt)
+    - window: bề rộng band xung quanh đường chéo (nhỏ hơn = nhanh hơn)
+    """
     x = np.array(x, dtype=np.float32)
     y = np.array(y, dtype=np.float32)
     
-    # Giới hạn độ dài để tránh chậm
+    # Downsample nếu quá dài
     if len(x) > max_len:
         x = x[::len(x)//max_len + 1]
     if len(y) > max_len:
@@ -23,11 +27,18 @@ def dtw_distance(x, y, max_len=2000):
         return float('inf')
     
     n, m = len(x), len(y)
+    
+    # Tự điều chỉnh window theo tỉ lệ độ dài
+    w = max(window, abs(n - m) + 1)
+    
     cost = np.full((n+1, m+1), np.inf)
     cost[0, 0] = 0.0
     
     for i in range(1, n+1):
-        for j in range(1, m+1):
+        # Chỉ tính trong band [j_start, j_end] thay vì toàn bộ
+        j_start = max(1, i - w)
+        j_end = min(m, i + w)
+        for j in range(j_start, j_end + 1):
             cost[i, j] = abs(x[i-1] - y[j-1]) + min(cost[i-1, j], 
                                                      cost[i, j-1], 
                                                      cost[i-1, j-1])

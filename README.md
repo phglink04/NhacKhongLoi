@@ -64,6 +64,19 @@ python app.py
 
 Mở trình duyệt: **http://127.0.0.1:5000** → Upload file `.wav` → Nhấn Tìm kiếm.
 
+#### Tính năng Web Interface
+
+- **Upload âm thanh**: Kéo thả hoặc click chọn file .wav
+- **🎧 Phát nhạc trực tiếp**: Click nút play (▶) bên cạnh từng kết quả để nghe bài hát
+  - Thanh tiến độ interactif: Click trên thanh để chuyển đến vị trí cụ thể
+  - Hiển thị thời lượng: Thời gian còn lại của bài hát
+  - Tự động dừng khi có bài khác phát
+  - Hỗ trợ format: .wav, .mp3, .flac, .ogg
+- **Tuỳ chỉnh tìm kiếm**: 
+  - Số kết quả trả về (1-50)
+  - Số cụm tìm kiếm (1, 2, 3, 5, 10)
+- **Thống kê tìm kiếm**: Thời gian, số bài duyệt, tỷ lệ tiết kiệm
+
 **Dòng lệnh:**
 
 ```bash
@@ -124,3 +137,54 @@ Query .wav → Trích xuất đặc trưng → Tìm cụm gần nhất → So s�
 | `build_database.py` | Gọi toàn bộ pipeline _1 → _6 |
 | `search_optimized.py` | Tìm kiếm cluster-based qua dòng lệnh |
 | `app.py` | Flask web server + giao diện upload |
+
+---
+
+## API Endpoints (Flask)
+
+### GET `/`
+Trả về giao diện web chính
+
+### POST `/search`
+**Tìm kiếm bài hát tương tự**
+
+**Parameters (form-data):**
+- `audio` (file): File âm thanh để tìm kiếm (.wav, .mp3, v.v.)
+- `top_k` (int): Số kết quả trả về (mặc định: 10)
+- `n_clusters` (int): Số cụm tìm kiếm (mặc định: 3)
+
+**Response:**
+```json
+{
+  "results": [
+    {
+      "rank": 1,
+      "title": "Gặp Mẹ Trong Mơ",
+      "file_name": "001_GapMeTrongMo.wav",
+      "score": 85.5,
+      "pitch_sim": 78.2,
+      "vec_sim": 92.1,
+      "cluster": 0
+    }
+  ],
+  "stats": {
+    "total_songs": 506,
+    "songs_searched": 42,
+    "clusters_used": 3,
+    "time_seconds": 1.23,
+    "savings_percent": 91.7
+  }
+}
+```
+
+### GET `/audio/<filename>`
+**Phát nhạc trực tiếp từ kết quả tìm kiếm**
+
+**Parameters:**
+- `filename` (string): Tên file âm thanh (e.g., `001_GapMeTrongMo.wav`)
+
+**Features:**
+- Hỗ trợ Range requests (seek bar)
+- MIME type tự động detect
+- CORS enabled cho playback từ browser
+- Validation để tránh path traversal attacks

@@ -42,6 +42,16 @@ with open("database/audio_features.csv", "r", encoding="utf-8") as f:
     for row in reader:
         db_features[row[0]] = list(map(float, row[1:]))
 
+# 4. Pre-load toàn bộ sequences vào RAM
+db_sequences = {}
+for fname in db_features.keys():
+    seq_path = f"database/sequences/{fname.replace('.wav', '.npz')}"
+    if os.path.exists(seq_path):
+        data = np.load(seq_path)
+        db_sequences[fname] = {"pitch": data['pitch'], "chroma": data['chroma']}
+    else:
+        db_sequences[fname] = None
+
 
 def find_nearest_clusters(query_vector, centroids, n_clusters=3):
     """
@@ -119,14 +129,7 @@ def search_with_clustering(query_path="query.wav", top_k=10, n_search_clusters=3
     for cluster_id, _ in nearest_clusters:
         for file_name in cluster_index[cluster_id]:
             db_vector = db_features[file_name]
-            
-            # Load sequence features
-            seq_path = f"database/sequences/{file_name.replace('.wav', '.npz')}"
-            if os.path.exists(seq_path):
-                db_seq_data = np.load(seq_path)
-                db_seq = {"pitch": db_seq_data['pitch'], "chroma": db_seq_data['chroma']}
-            else:
-                db_seq = None
+            db_seq = db_sequences.get(file_name)
             
             # Tính similarity
             score, pitch_sim, vec_sim = compute_melody_similarity(

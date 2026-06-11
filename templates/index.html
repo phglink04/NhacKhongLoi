@@ -19,10 +19,107 @@
             color: #e0e0e0;
         }
 
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
         .container {
             max-width: 900px;
             margin: 0 auto;
             padding: 40px 20px;
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #8888aa;
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.15);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        /* ========== LEFT COLUMN (UPLOAD) ========== */
+        .upload-column {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .upload-header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .upload-header h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .upload-header p {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        /* ========== RIGHT COLUMN (RESULTS) ========== */
+        .results-column {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .results-header h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .results-header p {
+            font-size: 0.85rem;
+            color: #999;
         }
 
         /* ========== HEADER ========== */
@@ -65,7 +162,28 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
             padding: 32px;
-            margin-bottom: 24px;
+            margin-bottom: 0;
+        }
+
+        .upload-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 32px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .upload-card .settings-row {
+            margin-top: 0;
+        }
+
+        .upload-card .btn-search {
+            margin-top: 0;
+            margin-bottom: 0;
         }
 
         .upload-zone {
@@ -224,9 +342,14 @@
         /* ========== STATS BAR ========== */
         .stats-bar {
             display: none;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(240, 147, 251, 0.05));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 16px;
         }
 
         .stats-bar.active {
@@ -234,28 +357,37 @@
         }
 
         .stat-item {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(102, 126, 234, 0.1);
             border-radius: 10px;
-            padding: 16px;
+            padding: 14px 12px;
             text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            background: rgba(102, 126, 234, 0.08);
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
         }
 
         .stat-value {
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #667eea, #f093fb);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            line-height: 1.2;
         }
 
         .stat-label {
             font-size: 0.7rem;
-            color: #777;
+            color: #999;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-top: 4px;
+            margin-top: 6px;
+            font-weight: 500;
         }
 
         /* ========== RESULTS TABLE ========== */
@@ -268,10 +400,95 @@
         }
 
         .results-title {
-            font-size: 1.2rem;
+            font-size: 0.95rem;
             font-weight: 600;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             color: #ccc;
+        }
+
+        .results-list-container {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .results-list-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .results-list-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .results-list-container::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.3);
+            border-radius: 3px;
+        }
+
+        .results-list-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.5);
+        }
+
+        /* ========== QUERY SECTION ========== */
+        .query-section {
+            display: none;
+            margin-bottom: 32px;
+        }
+
+        .query-section.active {
+            display: block;
+        }
+
+        .query-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+
+        .query-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(240, 147, 251, 0.05));
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .query-item:hover {
+            border-color: rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(240, 147, 251, 0.1));
+        }
+
+        .query-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .query-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .query-filename {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #e0e0e0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .query-label {
+            font-size: 0.78rem;
+            color: #888;
+            margin-top: 3px;
         }
 
         .result-item {
@@ -355,6 +572,69 @@
             color: #667eea;
         }
 
+        /* ========== AUDIO PLAYER ========== */
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            margin-left: 16px;
+        }
+
+        .play-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .play-btn.playing {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .audio-duration {
+            font-size: 0.8rem;
+            color: #999;
+            min-width: 40px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+            min-width: 100px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+            transition: width 0.1s linear;
+        }
+
+        audio {
+            display: none;
+        }
+
         /* ========== ERROR ========== */
         .error-msg {
             display: none;
@@ -372,89 +652,146 @@
         }
 
         /* ========== RESPONSIVE ========== */
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .stats-bar {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 12px;
+            }
+            .stat-item {
+                padding: 12px 10px;
+            }
+            .stat-value {
+                font-size: 1.4rem;
+            }
+        }
+
         @media (max-width: 600px) {
-            .container { padding: 20px 12px; }
-            .header h1 { font-size: 1.5rem; }
+            .main-layout { 
+                padding: 20px 12px;
+                gap: 16px;
+            }
+            .upload-header h2 { font-size: 1.1rem; }
+            .results-header h2 { font-size: 1.1rem; }
             .card { padding: 20px; }
+            .upload-card { padding: 20px; }
             .upload-zone { padding: 32px 16px; }
             .result-item { flex-wrap: wrap; gap: 10px; }
+            .query-item { flex-wrap: wrap; gap: 10px; }
+            .audio-controls { margin-left: 0; }
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 12px;
+                margin-bottom: 16px;
+            }
+            .stat-value {
+                font-size: 1.2rem;
+            }
+            .stat-label {
+                font-size: 0.65rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <h1>🎵 Tìm Kiếm Nhạc Tương Tự</h1>
-            <p>Upload file âm thanh để tìm các bài hát có giai điệu giống nhất</p>
-            <span class="badge">K-Means Clustering · 10 Cụm · 506 Bài</span>
-        </div>
-
-        <!-- UPLOAD CARD -->
-        <div class="card">
-            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-                <div class="upload-icon">🎧</div>
-                <h3>Kéo thả file âm thanh vào đây</h3>
-                <p>Hoặc click để chọn file · Hỗ trợ .wav, .mp3</p>
-                <div class="file-name" id="fileName"></div>
+    <div class="main-layout">
+        <!-- LEFT COLUMN: UPLOAD -->
+        <div class="upload-column">
+            <div class="upload-header">
+                <h2>📤 Upload Âm Thanh</h2>
+                <p>Chọn file để tìm kiếm</p>
             </div>
-            <input type="file" id="fileInput" accept=".wav,.mp3,.flac,.ogg">
 
-            <div class="settings-row">
-                <div class="setting-group">
-                    <label>Số kết quả trả về</label>
-                    <input type="number" id="topK" value="10" min="1" max="50">
+            <div class="upload-card">
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">🎧</div>
+                    <h3>Kéo thả file âm thanh vào đây</h3>
+                    <p>Hoặc click để chọn file · Hỗ trợ .wav, .mp3</p>
+                    <div class="file-name" id="fileName"></div>
                 </div>
-                <div class="setting-group">
-                    <label>Số cụm tìm kiếm</label>
-                    <select id="nClusters">
-                        <option value="1">1 cụm (nhanh nhất)</option>
-                        <option value="2">2 cụm</option>
-                        <option value="3" selected>3 cụm (cân bằng)</option>
-                        <option value="5">5 cụm</option>
-                        <option value="10">10 cụm (chính xác nhất)</option>
-                    </select>
+                <input type="file" id="fileInput" accept=".wav,.mp3,.flac,.ogg">
+
+                <div class="settings-row">
+                    <div class="setting-group">
+                        <label>Số kết quả trả về</label>
+                        <input type="number" id="topK" value="10" min="1" max="50">
+                    </div>
+                    <div class="setting-group">
+                        <label>Số cụm tìm kiếm</label>
+                        <select id="nClusters">
+                            <option value="1">1 cụm (nhanh nhất)</option>
+                            <option value="2">2 cụm</option>
+                            <option value="3" selected>3 cụm (cân bằng)</option>
+                            <option value="5">5 cụm</option>
+                            <option value="10">10 cụm (chính xác nhất)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn-search" id="btnSearch" disabled onclick="doSearch()">
+                    🔍 Tìm kiếm
+                </button>
+
+                <div class="error-msg" id="errorMsg"></div>
+            </div>
+
+            <!-- LOADING -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Đang phân tích âm thanh và tìm kiếm...</p>
+                <p style="font-size:0.8rem; color:#555; margin-top:8px;">Quá trình này có thể mất vài phút</p>
+            </div>
+
+            <!-- STATS -->
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-item">
+                    <div class="stat-value" id="statTime">-</div>
+                    <div class="stat-label">Thời gian (s)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statSearched">-</div>
+                    <div class="stat-label">Bài đã duyệt</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statTotal">-</div>
+                    <div class="stat-label">Tổng trong DB</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statSavings">-</div>
+                    <div class="stat-label">Tiết kiệm</div>
                 </div>
             </div>
-
-            <button class="btn-search" id="btnSearch" disabled onclick="doSearch()">
-                🔍 Tìm kiếm
-            </button>
-
-            <div class="error-msg" id="errorMsg"></div>
         </div>
 
-        <!-- LOADING -->
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Đang phân tích âm thanh và tìm kiếm...</p>
-            <p style="font-size:0.8rem; color:#555; margin-top:8px;">Quá trình này có thể mất vài phút</p>
-        </div>
+        <!-- RIGHT COLUMN: RESULTS -->
+        <div class="results-column">
+            <div class="results-header">
+                <h2>🎵 Kết Quả Tìm Kiếm</h2>
+                <p>Các bài hát có giai điệu tương tự</p>
+            </div>
 
-        <!-- STATS -->
-        <div class="stats-bar" id="statsBar">
-            <div class="stat-item">
-                <div class="stat-value" id="statTime">-</div>
-                <div class="stat-label">Thời gian (s)</div>
+            <!-- QUERY SECTION -->
+            <div class="query-section" id="querySection">
+                <div class="query-title">📤 File đã upload</div>
+                <div class="query-item" id="queryItem"></div>
             </div>
-            <div class="stat-item">
-                <div class="stat-value" id="statSearched">-</div>
-                <div class="stat-label">Bài đã duyệt</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="statTotal">-</div>
-                <div class="stat-label">Tổng trong DB</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="statSavings">-</div>
-                <div class="stat-label">Tiết kiệm</div>
-            </div>
-        </div>
 
-        <!-- RESULTS -->
-        <div class="results-section" id="resultsSection">
-            <div class="results-title" id="resultsTitle">Kết quả tìm kiếm</div>
-            <div id="resultsList"></div>
+            <!-- RESULTS -->
+            <div class="results-section" id="resultsSection">
+                <div class="results-title" id="resultsTitle">Kết quả tìm kiếm</div>
+                <div class="results-list-container" id="resultsList"></div>
+            </div>
         </div>
     </div>
 
@@ -509,6 +846,7 @@
             btnSearch.disabled = true;
             btnSearch.textContent = '⏳ Đang xử lý...';
             document.getElementById('loading').classList.add('active');
+            document.getElementById('querySection').classList.remove('active');
             document.getElementById('resultsSection').classList.remove('active');
             document.getElementById('statsBar').classList.remove('active');
             document.getElementById('errorMsg').classList.remove('active');
@@ -539,7 +877,31 @@
         }
 
         function showResults(data) {
-            const { results, stats } = data;
+            const { results, stats, query_file } = data;
+
+            // Display query file
+            if (query_file) {
+                const queryId = 'query-' + query_file.replace(/[^a-zA-Z0-9]/g, '_');
+                const queryItem = document.getElementById('queryItem');
+                queryItem.innerHTML = `
+                    <div class="query-icon">🎵</div>
+                    <div class="query-info">
+                        <div class="query-filename">${query_file}</div>
+                        <div class="query-label">File tìm kiếm</div>
+                    </div>
+                    <div class="audio-controls">
+                        <button class="play-btn" id="play-${queryId}" onclick="toggleAudio('${queryId}', '${query_file}', true)">
+                            ▶
+                        </button>
+                        <div class="progress-bar" id="prog-${queryId}" onclick="seekAudio(event, '${queryId}')">
+                            <div class="progress-fill" id="fill-${queryId}" style="width: 0%"></div>
+                        </div>
+                        <div class="audio-duration" id="dur-${queryId}">--:--</div>
+                        <audio id="audio-${queryId}"></audio>
+                    </div>
+                `;
+                document.getElementById('querySection').classList.add('active');
+            }
 
             // Stats
             document.getElementById('statTime').textContent = stats.time_seconds + 's';
@@ -557,6 +919,7 @@
 
             results.forEach(item => {
                 const rankClass = item.rank <= 3 ? `rank-${item.rank}` : 'rank-default';
+                const resultId = 'result-' + item.file_name.replace(/[^a-zA-Z0-9]/g, '_');
 
                 const div = document.createElement('div');
                 div.className = 'result-item';
@@ -569,6 +932,16 @@
                             · <span class="cluster-tag">Cụm ${item.cluster}</span>
                         </div>
                     </div>
+                    <div class="audio-controls">
+                        <button class="play-btn" id="play-${resultId}" onclick="toggleAudio('${resultId}', '${item.file_name}', false)">
+                            ▶
+                        </button>
+                        <div class="progress-bar" id="prog-${resultId}" onclick="seekAudio(event, '${resultId}')">
+                            <div class="progress-fill" id="fill-${resultId}" style="width: 0%"></div>
+                        </div>
+                        <div class="audio-duration" id="dur-${resultId}">--:--</div>
+                        <audio id="audio-${resultId}"></audio>
+                    </div>
                     <div class="result-score">
                         <div class="score-value">${item.score}%</div>
                         <div class="score-label">similarity</div>
@@ -578,6 +951,97 @@
             });
 
             document.getElementById('resultsSection').classList.add('active');
+        }
+
+        // ========== AUDIO PLAYER FUNCTIONS ==========
+        let currentPlayingId = null;
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '--:--';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function toggleAudio(resultId, filename, isQueryFile = false) {
+            const audio = document.getElementById(`audio-${resultId}`);
+            const playBtn = document.getElementById(`play-${resultId}`);
+
+            // Stop previous audio
+            if (currentPlayingId && currentPlayingId !== resultId) {
+                const prevAudio = document.getElementById(`audio-${currentPlayingId}`);
+                const prevBtn = document.getElementById(`play-${currentPlayingId}`);
+                if (prevAudio) prevAudio.pause();
+                if (prevBtn) {
+                    prevBtn.textContent = '▶';
+                    prevBtn.classList.remove('playing');
+                }
+            }
+
+            // Toggle current audio
+            if (audio.paused) {
+                // Load audio if not already loaded
+                if (!audio.src) {
+                    // Determine which endpoint to use
+                    const audioUrl = isQueryFile 
+                        ? `/query-audio/${filename}` 
+                        : `/audio/${filename}`;
+                    audio.src = audioUrl;
+                    
+                    // Update duration when metadata loads
+                    audio.addEventListener('loadedmetadata', () => {
+                        document.getElementById(`dur-${resultId}`).textContent = 
+                            formatTime(audio.duration);
+                    }, { once: true });
+
+                    // Update progress bar and current time
+                    audio.addEventListener('timeupdate', () => {
+                        const progress = (audio.currentTime / audio.duration) * 100;
+                        document.getElementById(`fill-${resultId}`).style.width = progress + '%';
+                    });
+
+                    // Handle when audio ends
+                    audio.addEventListener('ended', () => {
+                        playBtn.textContent = '▶';
+                        playBtn.classList.remove('playing');
+                        currentPlayingId = null;
+                    });
+
+                    // Handle errors
+                    audio.addEventListener('error', () => {
+                        alert('Không thể phát file audio: ' + filename);
+                        playBtn.textContent = '▶';
+                        playBtn.classList.remove('playing');
+                        currentPlayingId = null;
+                    });
+                }
+
+                // Play audio
+                audio.play().catch(err => {
+                    console.error('Lỗi phát âm thanh:', err);
+                    alert('Lỗi phát âm thanh. Vui lòng thử lại.');
+                });
+                playBtn.textContent = '⏸';
+                playBtn.classList.add('playing');
+                currentPlayingId = resultId;
+            } else {
+                // Pause audio
+                audio.pause();
+                playBtn.textContent = '▶';
+                playBtn.classList.remove('playing');
+                currentPlayingId = null;
+            }
+        }
+
+        function seekAudio(event, resultId) {
+            const audio = document.getElementById(`audio-${resultId}`);
+            const progressBar = document.getElementById(`prog-${resultId}`);
+            
+            if (!audio.src || isNaN(audio.duration)) return;
+
+            const rect = progressBar.getBoundingClientRect();
+            const percent = (event.clientX - rect.left) / rect.width;
+            audio.currentTime = percent * audio.duration;
         }
     </script>
 </body>
