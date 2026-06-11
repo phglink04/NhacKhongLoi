@@ -119,3 +119,8 @@ def build_database(dataset_path="Dataset_NhacKhongLoi",
 
 if __name__ == "__main__":
     build_database()
+    
+    # Tự động phân cụm sau khi xây dựng database
+    print("\n🔄 Đang phân cụm database...")
+    from _6_clustering import build_cluster_index
+    build_cluster_index(k=10)

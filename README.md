@@ -1,147 +1,126 @@
-# Music Audio Feature Extraction and Similarity Search
+# Hệ Thống Tìm Kiếm Nhạc Tương Tự — Tối Ưu Bằng Phân Cụm K-Means
 
-## Mô tả dự án
+## Mô tả
 
-Dự án này thực hiện trích xuất các đặc trưng âm thanh từ các bài hát nhạc dân gian và xây dựng một hệ thống tìm kiếm các bài hát tương tự dựa trên các đặc trưng này.
+Hệ thống trích xuất đặc trưng âm thanh từ các bài hát và tìm kiếm bài hát có giai điệu tương tự. Sử dụng thuật toán **K-Means (K=10)** để phân cụm cơ sở dữ liệu 506 bài, giúp tối ưu truy vấn bằng cách chỉ duyệt các cụm gần nhất thay vì toàn bộ database.
 
-## Chức năng chính
-
-- **Thu thập và xử lý dữ liệu âm thanh**: Tải xuống và cắt các tệp âm thanh từ các liên kết
-- **Tiền xử lý âm thanh**: Chuẩn hóa và xử lý tín hiệu âm thanh
-- **Trích xuất đặc trưng**: Sử dụng STFT (Short-Time Fourier Transform) để trích xuất đặc trưng âm thanh
-- **Chuẩn hóa**: Chuẩn hóa các đặc trưng để so sánh
-- **Tìm kiếm tương tự**: Tìm các bài hát có đặc trưng tương tự dựa trên độ đo khoảng cách
+---
 
 ## Cấu trúc dự án
 
 ```
-.
-├── _0_crawl_and_cut_data_v2.py    # Script thu thập dữ liệu (phiên bản 2)
-├── _0_crawl_and_cut_data.py       # Script thu thập dữ liệu (phiên bản 1)
-├── _1_preprocess.py               # Tiền xử lý tín hiệu âm thanh
-├── _2_stft.py                     # Tính toán STFT
-├── _3_feature_extraction.py       # Trích xuất đặc trưng
-├── _4_normalize.py                # Chuẩn hóa đặc trưng
-├── _5_similarity.py               # Tính toán độ tương tự
-├── build_database.py              # Xây dựng cơ sở dữ liệu
-├── search.py                      # Tìm kiếm các bài hát tương tự
-├── test.py                        # File kiểm thử
-├── database/                      # Thư mục cơ sở dữ liệu
-│   ├── audio_features.csv         # Bảng đặc trưng âm thanh
-│   ├── normalization.csv          # Tham số chuẩn hóa
-│   └── sequences/                 # Các file dữ liệu định dạng .npz
-└── CrawlData_Timestamps/          # Dữ liệu timestamps từ quá trình thu thập
+csdldpt/
+├── _0_crawl_and_cut_data_v2.py    # Thu thập & cắt dữ liệu âm thanh
+├── _1_preprocess.py               # Tiền xử lý tín hiệu
+├── _2_stft.py                     # Biến đổi Fourier (STFT)
+├── _3_feature_extraction.py       # Trích xuất đặc trưng (18 chiều)
+├── _4_normalize.py                # Chuẩn hóa Min-Max
+├── _5_similarity.py               # Tính độ tương tự (Cosine + DTW)
+├── _6_clustering.py               # Phân cụm K-Means (K=10)
+├── build_database.py              # Xây dựng toàn bộ database
+├── search_optimized.py            # Tìm kiếm tối ưu (cluster-based)
+├── app.py                         # Web server (Flask)
+├── templates/index.html           # Giao diện web
+├── database/                      # Cơ sở dữ liệu (tự sinh)
+├── Dataset_NhacKhongLoi/          # File .wav gốc
+└── Dataset_Test/                  # File .wav test
 ```
 
-## Yêu cầu
+---
 
-- Python 3.7+
-- NumPy
-- SciPy
-- Librosa
-- Pandas
-- Các thư viện khác (xem chi tiết trong requirements.txt nếu có)
-
-## Hướng dẫn sử dụng
-
-### 1. Thu thập và xử lý dữ liệu
+## Cài đặt
 
 ```bash
-python _0_crawl_and_cut_data_v2.py
+pip install numpy scipy flask tqdm
 ```
 
-### 2. Tiền xử lý âm thanh
+---
+
+## Hướng dẫn chạy
+
+### Bước 1 — Xây dựng Database (chạy 1 lần)
+
+**Nếu đã có thư mục `database/` với đầy đủ dữ liệu**, chỉ cần chạy phân cụm:
 
 ```bash
-python _1_preprocess.py
+python _6_clustering.py
 ```
 
-### 3. Tính toán STFT
-
-```bash
-python _2_stft.py
-```
-
-### 4. Trích xuất đặc trưng
-
-```bash
-python _3_feature_extraction.py
-```
-
-### 5. Chuẩn hóa đặc trưng
-
-```bash
-python _4_normalize.py
-```
-
-### 6. Tính toán độ tương tự
-
-```bash
-python _5_similarity.py
-```
-
-### 7. Xây dựng cơ sở dữ liệu
+**Nếu chưa có database** (xây từ đầu):
 
 ```bash
 python build_database.py
 ```
 
-### 8. Tìm kiếm các bài hát tương tự
+> `build_database.py` tự động chạy toàn bộ pipeline và phân cụm.
+
+### Bước 2 — Tìm kiếm
+
+**Giao diện Web:**
 
 ```bash
-python search.py
+python app.py
 ```
 
-## Cấu trúc dữ liệu
+Mở trình duyệt: **http://127.0.0.1:5000** → Upload file `.wav` → Nhấn Tìm kiếm.
 
-### audio_features.csv
-Bảng chứa các đặc trưng âm thanh được trích xuất từ các bài hát, bao gồm:
-- ID bài hát
-- Các đặc trưng số từ STFT (biên độ, tần số, v.v.)
+**Dòng lệnh:**
 
-### normalization.csv
-Bảng chứa các tham số chuẩn hóa (min, max, trung bình, độ lệch chuẩn) cho mỗi đặc trưng
+```bash
+python search_optimized.py
+```
 
-### sequences/
-Thư mục chứa các file dữ liệu nhị phân (.npz) cho mỗi bài hát, được đặt tên theo ID:
-- `001_GapMeTrongMo.npz` - Bài hát "Gặp Me Trong Mơ"
-- `002_NhatKyCuaMe.npz` - Bài hát "Nhật Ký Của Me"
-- ... và các bài hát khác
+---
 
-## Mô tả các file script
+## Quy trình xử lý
 
-| File | Mô tả |
-|------|-------|
-| `_0_crawl_and_cut_data_v2.py` | Thu thập dữ liệu âm thanh từ các URL và cắt thành các đoạn |
-| `_1_preprocess.py` | Tiền xử lý: chuẩn hóa biên độ, loại bỏ tiếng ồn, v.v. |
-| `_2_stft.py` | Tính toán biến đổi Fourier thời gian ngắn từ dữ liệu âm thanh |
-| `_3_feature_extraction.py` | Trích xuất các đặc trưng từ STFT (Mel-frequency, v.v.) |
-| `_4_normalize.py` | Chuẩn hóa các đặc trưng về cùng một khoảng giá trị |
-| `_5_similarity.py` | Tính toán độ đo tương tự giữa các bài hát |
-| `build_database.py` | Tích hợp tất cả các bước vào một cơ sở dữ liệu |
-| `search.py` | Giao diện tìm kiếm để tìm các bài hát tương tự |
-| `test.py` | Các test case để xác minh chức năng |
+```
+File .wav → Tiền xử lý → STFT → Trích xuất đặc trưng (18D) → Chuẩn hóa → Lưu DB
+                                                                              ↓
+                                                                     K-Means (K=10)
+                                                                              ↓
+Query .wav → Trích xuất đặc trưng → Tìm cụm gần nhất → So sánh trong cụm → Kết quả
+```
 
-## Cách hoạt động
+---
 
-1. **Chuỗi xử lý dữ liệu**: Dữ liệu âm thanh → Tiền xử lý → STFT → Trích xuất đặc trưng → Chuẩn hóa
-2. **Lưu trữ**: Các đặc trưng được lưu trong CSV và dữ liệu định dạng NumPy
-3. **Tìm kiếm**: Khi tìm kiếm, hệ thống so sánh các đặc trưng của bài hát truy vấn với tất cả các bài hát trong cơ sở dữ liệu
+## Đặc trưng âm thanh (18 chiều)
 
-## Kết quả
+| Đặc trưng      | Số chiều | Mô tả                           |
+|----------------|----------|----------------------------------|
+| RMS Energy     | 2        | Năng lượng trung bình & độ lệch |
+| ZCR            | 2        | Tần suất tín hiệu đổi dấu      |
+| Pitch          | 2        | Cao độ trung bình & độ lệch     |
+| Chroma         | 12       | Phân bố năng lượng 12 nốt nhạc  |
 
-Hệ thống trả về danh sách các bài hát được sắp xếp theo độ tương tự (từ cao nhất đến thấp nhất)
+---
 
-## Ghi chú
+## Thuật toán phân cụm & tìm kiếm
 
-- Cơ sở dữ liệu hiện tại chứa 50+ bài hát nhạc dân gian Việt Nam
-- Có thể mở rộng để thêm các bài hát hoặc loại nhạc khác
-- Chất lượng kết quả phụ thuộc vào chất lượng dữ liệu đầu vào và các tham số trích xuất đặc trưng
+**Phân cụm (offline — chạy 1 lần):**
+- K-Means++ khởi tạo centroid → Lặp gán cụm + cập nhật centroid → Hội tụ
+- 506 bài hát → 10 cụm (29–79 bài/cụm)
 
-## Tác giả
+**Tìm kiếm (online — mỗi lần query):**
+1. Trích xuất đặc trưng file query
+2. Tính khoảng cách Euclid từ query đến 10 centroid → Chọn 3 cụm gần nhất
+3. So sánh query với các bài trong 3 cụm đó (Cosine Similarity + DTW Pitch)
+4. Trả về top-K bài có score cao nhất
 
-[Thêm thông tin tác giả nếu cần]
+**Công thức score:** `score = 0.65 × pitch_similarity + 0.35 × vector_similarity`
 
-## Giấy phép
+---
 
-[Thêm thông tin giấy phép nếu cần]
+## Mô tả file
+
+| File | Vai trò |
+|------|---------|
+| `_1_preprocess.py` | Đọc WAV → Mono → Normalize → Trim → Pre-emphasis → Framing → Hamming |
+| `_2_stft.py` | FFT từng frame → Log magnitude spectrum |
+| `_3_feature_extraction.py` | Trích xuất RMS, ZCR, Pitch, Chroma → Vector 18 chiều |
+| `_4_normalize.py` | Chuẩn hóa Min-Max về [0, 1] |
+| `_5_similarity.py` | Cosine Similarity + Dynamic Time Warping (Pitch) |
+| `_6_clustering.py` | K-Means++ phân 506 bài → 10 cụm |
+| `build_database.py` | Gọi toàn bộ pipeline _1 → _6 |
+| `search_optimized.py` | Tìm kiếm cluster-based qua dòng lệnh |
+| `app.py` | Flask web server + giao diện upload |

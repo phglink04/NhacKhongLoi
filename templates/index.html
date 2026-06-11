@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tìm kiếm nhạc tương tự</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #8888aa;
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.15);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        /* ========== UPLOAD CARD ========== */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .upload-zone {
+            border: 2px dashed rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 48px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-zone.has-file {
+            border-color: #4ade80;
+            background: rgba(74, 222, 128, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        .upload-zone h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #ccc;
+        }
+
+        .upload-zone p {
+            font-size: 0.85rem;
+            color: #777;
+        }
+
+        .file-name {
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: #4ade80;
+            font-weight: 500;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* ========== SETTINGS ROW ========== */
+        .settings-row {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .setting-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .setting-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .setting-group select,
+        .setting-group input[type="number"] {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .setting-group select:focus,
+        .setting-group input[type="number"]:focus {
+            border-color: #667eea;
+        }
+
+        .setting-group select option {
+            background: #1a1a2e;
+        }
+
+        /* ========== SEARCH BUTTON ========== */
+        .btn-search {
+            width: 100%;
+            margin-top: 24px;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-search:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-search:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ========== LOADING ========== */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        /* ========== STATS BAR ========== */
+        .stats-bar {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stats-bar.active {
+            display: grid;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        /* ========== RESULTS TABLE ========== */
+        .results-section {
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .results-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #ccc;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .result-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(102, 126, 234, 0.2);
+            transform: translateX(4px);
+        }
+
+        .result-rank {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #1a1a2e; }
+        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: #1a1a2e; }
+        .rank-3 { background: linear-gradient(135deg, #cd7f32, #b06820); color: #1a1a2e; }
+        .rank-default { background: rgba(255, 255, 255, 0.08); color: #999; }
+
+        .result-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .result-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #e0e0e0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .result-meta {
+            font-size: 0.78rem;
+            color: #777;
+            margin-top: 3px;
+        }
+
+        .result-score {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .score-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .score-label {
+            font-size: 0.7rem;
+            color: #666;
+        }
+
+        .cluster-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: rgba(102, 126, 234, 0.15);
+            color: #667eea;
+        }
+
+        /* ========== ERROR ========== */
+        .error-msg {
+            display: none;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-top: 16px;
+            font-size: 0.9rem;
+        }
+
+        .error-msg.active {
+            display: block;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 600px) {
+            .container { padding: 20px 12px; }
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 20px; }
+            .upload-zone { padding: 32px 16px; }
+            .result-item { flex-wrap: wrap; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>🎵 Tìm Kiếm Nhạc Tương Tự</h1>
+            <p>Upload file âm thanh để tìm các bài hát có giai điệu giống nhất</p>
+            <span class="badge">K-Means Clustering · 10 Cụm · 506 Bài</span>
+        </div>
+
+        <!-- UPLOAD CARD -->
+        <div class="card">
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">🎧</div>
+                <h3>Kéo thả file âm thanh vào đây</h3>
+                <p>Hoặc click để chọn file · Hỗ trợ .wav, .mp3</p>
+                <div class="file-name" id="fileName"></div>
+            </div>
+            <input type="file" id="fileInput" accept=".wav,.mp3,.flac,.ogg">
+
+            <div class="settings-row">
+                <div class="setting-group">
+                    <label>Số kết quả trả về</label>
+                    <input type="number" id="topK" value="10" min="1" max="50">
+                </div>
+                <div class="setting-group">
+                    <label>Số cụm tìm kiếm</label>
+                    <select id="nClusters">
+                        <option value="1">1 cụm (nhanh nhất)</option>
+                        <option value="2">2 cụm</option>
+                        <option value="3" selected>3 cụm (cân bằng)</option>
+                        <option value="5">5 cụm</option>
+                        <option value="10">10 cụm (chính xác nhất)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn-search" id="btnSearch" disabled onclick="doSearch()">
+                🔍 Tìm kiếm
+            </button>
+
+            <div class="error-msg" id="errorMsg"></div>
+        </div>
+
+        <!-- LOADING -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Đang phân tích âm thanh và tìm kiếm...</p>
+            <p style="font-size:0.8rem; color:#555; margin-top:8px;">Quá trình này có thể mất vài phút</p>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-bar" id="statsBar">
+            <div class="stat-item">
+                <div class="stat-value" id="statTime">-</div>
+                <div class="stat-label">Thời gian (s)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statSearched">-</div>
+                <div class="stat-label">Bài đã duyệt</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statTotal">-</div>
+                <div class="stat-label">Tổng trong DB</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statSavings">-</div>
+                <div class="stat-label">Tiết kiệm</div>
+            </div>
+        </div>
+
+        <!-- RESULTS -->
+        <div class="results-section" id="resultsSection">
+            <div class="results-title" id="resultsTitle">Kết quả tìm kiếm</div>
+            <div id="resultsList"></div>
+        </div>
+    </div>
+
+    <script>
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileNameEl = document.getElementById('fileName');
+        const btnSearch = document.getElementById('btnSearch');
+        let selectedFile = null;
+
+        // Drag & Drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                selectFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                selectFile(fileInput.files[0]);
+            }
+        });
+
+        function selectFile(file) {
+            selectedFile = file;
+            fileNameEl.textContent = '📄 ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' MB)';
+            uploadZone.classList.add('has-file');
+            btnSearch.disabled = false;
+        }
+
+        function doSearch() {
+            if (!selectedFile) return;
+
+            const topK = document.getElementById('topK').value;
+            const nClusters = document.getElementById('nClusters').value;
+
+            const formData = new FormData();
+            formData.append('audio', selectedFile);
+            formData.append('top_k', topK);
+            formData.append('n_clusters', nClusters);
+
+            // UI state
+            btnSearch.disabled = true;
+            btnSearch.textContent = '⏳ Đang xử lý...';
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('resultsSection').classList.remove('active');
+            document.getElementById('statsBar').classList.remove('active');
+            document.getElementById('errorMsg').classList.remove('active');
+
+            fetch('/search', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        showError(data.error);
+                        return;
+                    }
+                    showResults(data);
+                })
+                .catch(err => {
+                    showError('Lỗi kết nối: ' + err.message);
+                })
+                .finally(() => {
+                    document.getElementById('loading').classList.remove('active');
+                    btnSearch.disabled = false;
+                    btnSearch.textContent = '🔍 Tìm kiếm';
+                });
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.textContent = '❌ ' + msg;
+            el.classList.add('active');
+        }
+
+        function showResults(data) {
+            const { results, stats } = data;
+
+            // Stats
+            document.getElementById('statTime').textContent = stats.time_seconds + 's';
+            document.getElementById('statSearched').textContent = stats.songs_searched;
+            document.getElementById('statTotal').textContent = stats.total_songs;
+            document.getElementById('statSavings').textContent = stats.savings_percent + '%';
+            document.getElementById('statsBar').classList.add('active');
+
+            // Results
+            document.getElementById('resultsTitle').textContent =
+                `Top ${results.length} bài hát giống nhất`;
+
+            const list = document.getElementById('resultsList');
+            list.innerHTML = '';
+
+            results.forEach(item => {
+                const rankClass = item.rank <= 3 ? `rank-${item.rank}` : 'rank-default';
+
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                div.innerHTML = `
+                    <div class="result-rank ${rankClass}">${item.rank}</div>
+                    <div class="result-info">
+                        <div class="result-title">${item.title}</div>
+                        <div class="result-meta">
+                            ${item.file_name} · Pitch: ${item.pitch_sim}% · Vector: ${item.vec_sim}%
+                            · <span class="cluster-tag">Cụm ${item.cluster}</span>
+                        </div>
+                    </div>
+                    <div class="result-score">
+                        <div class="score-value">${item.score}%</div>
+                        <div class="score-label">similarity</div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+
+            document.getElementById('resultsSection').classList.add('active');
+        }
+    </script>
+</body>
+</html>
