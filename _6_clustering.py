@@ -4,8 +4,6 @@ import os
 import json
 
 
-# ==================== K-MEANS CLUSTERING====================
-
 def kmeans_init_centroids(data, k, seed=42):
     """Khởi tạo centroid bằng K-Means++ để có kết quả tốt hơn random"""
     np.random.seed(seed)
@@ -136,7 +134,7 @@ def build_cluster_index(k=10, db_dir="database"):
     
     # ==================== 4. In thống kê ====================
     print(f"\n{'='*60}")
-    print(f"📊 KẾT QUẢ PHÂN CỤM K-MEANS (K={k})")
+    print(f"KẾT QUẢ PHÂN CỤM K-MEANS (K={k})")
     print(f"{'='*60}")
     print(f"{'Cluster':<12} {'Số bài hát':<15} {'Ví dụ'}")
     print(f"{'-'*60}")
@@ -157,19 +155,19 @@ def build_cluster_index(k=10, db_dir="database"):
     # Lưu centroids
     centroids_path = os.path.join(db_dir, "cluster_centroids.npy")
     np.save(centroids_path, centroids)
-    print(f"\n💾 Đã lưu centroids    → {centroids_path}")
+    print(f"\nĐã lưu centroids    → {centroids_path}")
     
     # Lưu cluster index (cluster_id -> file list)
     index_path = os.path.join(db_dir, "cluster_index.json")
     with open(index_path, "w", encoding="utf-8") as f:
         json.dump(cluster_index, f, ensure_ascii=False, indent=2)
-    print(f"💾 Đã lưu cluster index → {index_path}")
+    print(f"Đã lưu cluster index → {index_path}")
     
     # Lưu cluster labels (file -> cluster_id)
     labels_path = os.path.join(db_dir, "cluster_labels.json")
     with open(labels_path, "w", encoding="utf-8") as f:
         json.dump(cluster_labels, f, ensure_ascii=False, indent=2)
-    print(f"💾 Đã lưu cluster labels → {labels_path}")
+    print(f"Đã lưu cluster labels → {labels_path}")
     
     return labels, centroids, cluster_index
 

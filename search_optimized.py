@@ -9,9 +9,6 @@ from _3_feature_extraction import extract_features
 from _4_normalize import normalize_vector
 from _5_similarity import compute_melody_similarity, cosine_similarity
 
-
-# ==================== LOAD DATABASE ====================
-
 # 1. Load normalization params
 min_vals = []
 max_vals = []
@@ -111,16 +108,16 @@ def search_with_clustering(query_path="query.wav", top_k=10, n_search_clusters=3
     total_songs_in_db = sum(len(v) for v in cluster_index.values())
     songs_to_search = sum(len(cluster_index[cid]) for cid, _ in nearest_clusters)
     
-    print(f"   📊 Các cụm được chọn:")
+    print(f"Các cụm được chọn:")
     for cid, dist in nearest_clusters:
         n_songs = len(cluster_index[cid])
-        print(f"      • Cụm {cid}: {n_songs} bài hát (khoảng cách: {dist:.4f})")
+        print(f"Cụm {cid}: {n_songs} bài hát (khoảng cách: {dist:.4f})")
     
-    print(f"\n   🎯 Tìm kiếm trong {songs_to_search}/{total_songs_in_db} bài hát "
+    print(f"\nTìm kiếm trong {songs_to_search}/{total_songs_in_db} bài hát "
           f"({songs_to_search/total_songs_in_db*100:.1f}% database)")
     
     # ==================== 3. So sánh chỉ trong các cụm đã chọn ====================
-    print(f"\n⏳ Bước 3: Tính similarity trong các cụm đã chọn...")
+    print(f"\nBước 3: Tính similarity trong các cụm đã chọn...")
     t_search_start = time.time()
     
     results = []
@@ -146,7 +143,7 @@ def search_with_clustering(query_path="query.wav", top_k=10, n_search_clusters=3
             compared_count += 1
     
     t_search_end = time.time()
-    print(f"   ✅ So sánh {compared_count} bài hát ({t_search_end - t_search_start:.2f}s)")
+    print(f"So sánh {compared_count} bài hát ({t_search_end - t_search_start:.2f}s)")
     
     # ==================== 4. Sắp xếp và in kết quả ====================
     results.sort(key=lambda x: x["score"], reverse=True)
@@ -154,7 +151,7 @@ def search_with_clustering(query_path="query.wav", top_k=10, n_search_clusters=3
     t_total = time.time() - t_start
     
     print(f"\n{'='*80}")
-    print(f"🏆 TOP {top_k} BÀI HÁT CÓ GIAI ĐIỆU GIỐNG NHẤT (Cluster-based)")
+    print(f"TOP {top_k} BÀI HÁT CÓ GIAI ĐIỆU GIỐNG NHẤT (Cluster-based)")
     print(f"{'='*80}")
     print(f"{'STT':<5} {'Tên bài hát':<45} {'Score':<10} {'Pitch':<10} {'Cụm':<6}")
     print(f"{'-'*80}")
@@ -167,7 +164,7 @@ def search_with_clustering(query_path="query.wav", top_k=10, n_search_clusters=3
               f"C{item['cluster']}")
     
     print(f"{'-'*80}")
-    print(f"\n📈 THỐNG KÊ HIỆU SUẤT:")
+    print(f"\nTHỐNG KÊ HIỆU SUẤT:")
     print(f"   • Thời gian trích xuất query : {t_extract - t_start:.2f}s")
     print(f"   • Thời gian tìm kiếm         : {t_search_end - t_search_start:.2f}s")
     print(f"   • Tổng thời gian             : {t_total:.2f}s")
@@ -184,11 +181,5 @@ def search_with_clustering(query_path="query.wav", top_k=10, n_search_clusters=3
 
 if __name__ == "__main__":
     query = "D:\\study_document\\ky2nam4\\CSDLDPT\\csdldpt\\Dataset_Test\\002_NangAmXaDan.wav"
-    
-    print("╔══════════════════════════════════════════════════════════════╗")
-    print("║  HỆ THỐNG TÌM KIẾM NHẠC - TỐI ƯU BẰNG PHÂN CỤM (K=10) ║")
-    print("╚══════════════════════════════════════════════════════════════╝")
-    print()
-    
-    # Tìm kiếm chính bằng clustering
+    print(f"Tìm kiếm file: {query}")    
     search_with_clustering(query_path=query, top_k=5, n_search_clusters=3)

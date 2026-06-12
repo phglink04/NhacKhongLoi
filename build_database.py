@@ -1,13 +1,12 @@
 import os
 import csv
 import numpy as np
-from tqdm import tqdm  # Optional: thanh tiến trình
-
-# Import các module đã sửa
+from tqdm import tqdm  
 from _1_preprocess import preprocess_audio
 from _2_stft import compute_stft
 from _3_feature_extraction import extract_features
 from _4_normalize import compute_min_max, normalize_vector
+from _6_clustering import build_cluster_index
 
 
 def build_database(dataset_path="Dataset_NhacKhongLoi", 
@@ -23,7 +22,7 @@ def build_database(dataset_path="Dataset_NhacKhongLoi",
     processed_count = 0
     error_count = 0
 
-    print("🚀 Bắt đầu xây dựng database...")
+    print("Bắt đầu xây dựng database...")
     print(f"Thư mục dataset: {dataset_path}\n")
 
     # Lấy danh sách file wav
@@ -33,17 +32,17 @@ def build_database(dataset_path="Dataset_NhacKhongLoi",
         try:
             file_path = os.path.join(dataset_path, file_name)
             
-            # ==================== 1. Preprocess ====================
+            # preprocess
             windowed_frames, sample_rate = preprocess_audio(file_path)
             
             if len(windowed_frames) == 0:
-                print(f"⚠️  File rỗng: {file_name}")
+                print(f"File rỗng: {file_name}")
                 continue
 
-            # ==================== 2. Compute STFT ====================
+            # Compute STFT
             stft_result = compute_stft(windowed_frames)
 
-            # ==================== 3. Extract Features ====================
+            # Extract Features
             features_dict = extract_features(windowed_frames, stft_result, sample_rate)
 
             # Lưu song-level vector
@@ -59,15 +58,15 @@ def build_database(dataset_path="Dataset_NhacKhongLoi",
             processed_count += 1
 
         except Exception as e:
-            print(f"❌ Lỗi khi xử lý {file_name}: {e}")
+            print(f"Lỗi khi xử lý {file_name}: {e}")
             error_count += 1
             continue
 
     if processed_count == 0:
-        print("❌ Không có file nào được xử lý!")
+        print("Không có file nào được xử lý!")
         return
 
-    # ==================== 4. Normalize ====================
+    # Normalize
     feature_matrix = np.array(all_song_vectors)
     min_vals, max_vals = compute_min_max(feature_matrix)
 
@@ -76,7 +75,7 @@ def build_database(dataset_path="Dataset_NhacKhongLoi",
         norm_vec = normalize_vector(vec, min_vals, max_vals)
         normalized_features.append(norm_vec)
 
-    # ==================== 5. Lưu CSV (Song-level features) ====================
+    # 5. Lưu CSV (Song-level features)
     csv_path = os.path.join(output_dir, "audio_features.csv")
     
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
@@ -91,7 +90,7 @@ def build_database(dataset_path="Dataset_NhacKhongLoi",
         for name, norm_vec in zip(file_names, normalized_features):
             writer.writerow([name] + norm_vec)
 
-    # ==================== 6. Lưu thông số normalize ====================
+    # Lưu thông số normalize
     norm_params_path = os.path.join(output_dir, "normalization.csv")
     with open(norm_params_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
@@ -105,22 +104,18 @@ def build_database(dataset_path="Dataset_NhacKhongLoi",
 
     # ==================== Kết quả ====================
     print("\n" + "="*60)
-    print("✅ XÂY DỰNG DATABASE HOÀN TẤT!")
+    print("XÂY DỰNG DATABASE HOÀN TẤT!")
     print("="*60)
-    print(f"✅ Số bài hát thành công : {processed_count}/{len(audio_files)}")
-    print(f"❌ Lỗi                  : {error_count}")
-    print(f"📁 Database folder      : {output_dir}/")
-    print(f"   • music_features.csv     (song-level features)")
-    print(f"   • normalization.csv      (min-max values)")
-    print(f"   • sequences/             (pitch & chroma từng frame)")
-    print(f"📊 Feature dimension    : {feature_matrix.shape[1]}")
+    print(f"Số bài hát thành công : {processed_count}/{len(audio_files)}")
+    print(f"Lỗi                  : {error_count}")
+    print(f"Database folder      : {output_dir}/")
+    print(f"  music_features.csv     (song-level features)")
+    print(f"  normalization.csv      (min-max values)")
+    print(f"  sequences/             (pitch & chroma từng frame)")
+    print(f"Feature dimension    : {feature_matrix.shape[1]}")
     print("="*60)
 
 
 if __name__ == "__main__":
     build_database()
-    
-    # Tự động phân cụm sau khi xây dựng database
-    print("\n🔄 Đang phân cụm database...")
-    from _6_clustering import build_cluster_index
-    build_cluster_index(k=10)
+    build_cluster_index(k=10)

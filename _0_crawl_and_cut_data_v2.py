@@ -63,7 +63,7 @@ txt_files = [
 ]
 
 if len(txt_files) == 0:
-    print("❌ Không tìm thấy file txt nào.")
+    print("Không tìm thấy file txt nào.")
     exit()
 
 # xử lý từng file txt một
@@ -85,16 +85,16 @@ for txt_filename in txt_files:
         ]
 
     if len(lines) < 2:
-        print("⚠️ File không đủ dữ liệu.")
+        print("File không đủ dữ liệu.")
         continue
 
     url = lines[0] 
-    print(f"🎵 URL: {url}")
+    print(f"URL: {url}")
 
     temp_filename = f"temp_{hash(url)}.wav" # tên tạm để lưu audio gốc
 
     # tải audio từ YouTube
-    print("⏳ Đang tải audio...")
+    print("Đang tải audio...")
     ydl_opts = {
         'format': 'bestaudio/best',
         'postprocessors': [{
@@ -109,9 +109,9 @@ for txt_filename in txt_files:
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
-        print("✅ Download thành công")
+        print("Download thành công")
     except Exception as e:
-        print(f"❌ Lỗi download: {e}")
+        print(f"Lỗi download: {e}")
         continue
 
     # phân tích nội dung để lấy thông tin track
@@ -142,9 +142,9 @@ for txt_filename in txt_files:
     # số track tìm được
     num_tracks = len(tracks_info)
     if num_tracks == 0:
-        print("⚠️ Không có timestamp.")
+        print("Không có timestamp.")
         continue
-    print(f"🎼 Tổng số track: {num_tracks}")
+    print(f"Tổng số track: {num_tracks}")
     # xử lý từng track một
     for i in range(num_tracks):
         start_sec = time_to_sec(
@@ -166,7 +166,7 @@ for txt_filename in txt_files:
         clean_name = make_safe_filename(title) # tên file an toàn
         normalized_name = clean_name.lower() # tên chuẩn hóa để check trùng lặp
         if normalized_name in existing_names:
-            print(f"❌ Bỏ qua bài trùng: {title}")
+            print(f"Bỏ qua bài trùng: {title}")
             continue
         # thêm vào set
         existing_names.add(normalized_name)
@@ -178,13 +178,13 @@ for txt_filename in txt_files:
             if duration > 20:
                 cut_duration = duration - 20
             else:
-                print(f"⏭️ Bỏ qua track {i+1}")
+                print(f"Bỏ qua track {i+1}")
                 continue
         output_name = os.path.join(
             OUTPUT_DIR,
             f"{global_track_count:03d}_{clean_name}.wav"
         )
-        print(f"✅ {title}")
+        print(f"{title}")
         cmd = [
             "ffmpeg",
             "-y",
@@ -219,10 +219,7 @@ for txt_filename in txt_files:
         )
 
         global_track_count += 1
-
-    # ======================================
     # XÓA FILE TẠM
-    # ======================================
     if os.path.exists(temp_filename):
 
         os.remove(temp_filename)

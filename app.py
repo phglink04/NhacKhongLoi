@@ -17,8 +17,7 @@ app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# ==================== LOAD DATABASE (1 lần khi khởi động) ====================
-
+#LOAD DATABASE (1 lần khi khởi động)
 print("Loading database...")
 
 # Normalization params
@@ -60,7 +59,7 @@ total_songs = len(db_features)
 print(f"Database loaded: {total_songs} songs, {len(cluster_centroids)} clusters, {len(db_sequences)} sequences in RAM")
 
 
-# ==================== SEARCH LOGIC ====================
+# SEARCH LOGIC
 
 def find_nearest_clusters(query_vector, centroids, n_clusters=3):
     distances = []
@@ -138,8 +137,7 @@ def do_search(file_path, top_k=10, n_clusters=3):
     }
 
 
-# ==================== ROUTES ====================
-
+# ROUTES
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -175,7 +173,6 @@ def search():
 
 @app.route("/query-audio/<filename>")
 def serve_query_audio(filename):
-    """Phục vụ file audio đã upload để nghe trực tiếp"""
     from flask import send_from_directory
     import mimetypes
     
@@ -207,7 +204,6 @@ def serve_query_audio(filename):
 
 @app.route("/audio/<filename>")
 def serve_audio(filename):
-    """Phục vụ file audio từ thư mục dataset để nghe trực tiếp"""
     from flask import send_from_directory
     import mimetypes
     
